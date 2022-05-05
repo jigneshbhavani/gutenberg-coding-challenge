@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, sprintf, _n } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -25,19 +25,25 @@ export default function Preview( { countryCode, relatedPosts } ) {
 			>
 				<div className="xwp-country-card-flag">{ emojiFlag }</div>
 			</div>
-			<h3 className="xwp-country-card__heading">
+			<h4 className="xwp-country-card__heading">
 				{ __( 'Hello from' ) }{ ' ' }
 				<strong>{ countries[ countryCode ] }</strong> (
 				<span className="xwp-country-card__country-code">
 					{ countryCode }
 				</span>
 				), { continentNames[ continents[ countryCode ] ] }!
-			</h3>
+			</h4>
 			<div className="xwp-country-card__related-posts">
 				<h3 className="xwp-country-card__related-posts__heading">
 					{ hasRelatedPosts
 						? sprintf(
-								__( 'There are %d related posts:' ),
+								/** Translators: %d is the number of posts found. */
+								_n(
+									'There is %d related post:',
+									'There are %d related posts:',
+									relatedPosts.length,
+									'xwp-country-card'
+								),
 								relatedPosts.length
 						  )
 						: __( 'There are no related posts.' ) }
@@ -51,12 +57,18 @@ export default function Preview( { countryCode, relatedPosts } ) {
 									href={ relatedPost.link }
 									data-post-id={ relatedPost.id }
 								>
-									<h3 className="title">
-										{ relatedPost.title }
-									</h3>
-									<p className="excerpt">
-										{ relatedPost.excerpt }
-									</p>
+									<h3
+										className="title"
+										dangerouslySetInnerHTML={ {
+											__html: relatedPost.excerpt,
+										} }
+									/>
+									<p
+										className="excerpt"
+										dangerouslySetInnerHTML={ {
+											__html: relatedPost.excerpt,
+										} }
+									/>
 								</a>
 							</li>
 						) ) }

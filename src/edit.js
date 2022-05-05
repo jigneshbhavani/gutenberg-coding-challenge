@@ -11,6 +11,7 @@ import {
 } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -42,23 +43,24 @@ export default function Edit( { attributes, setAttributes } ) {
 	const handleChangeCountryCode = ( newCountryCode ) => {
 		if ( newCountryCode && countryCode !== newCountryCode ) {
 			setAttributes( {
+				...attributes,
 				countryCode: newCountryCode,
 				relatedPosts: [],
 			} );
 		}
 	};
 
+	let posts = [];
+
 	useEffect( () => {
-		async function getRelatedPosts() {
-			const postId = window.location.href.match( /post=([\d]+)/ )[ 1 ];
-			const response = await window.fetch(
-				`/wp-json/wp/v2/posts?search=${ countries[ countryCode ] }&exclude=${ postId }`
-			);
+		const getRelatedPosts = async () => {
+			const postId = wp.data.select( 'core/editor' ).getCurrentPostId();
 
-			if ( ! response.ok )
-				throw new Error( `HTTP error! Status: ${ response.status }` );
-
-			const posts = await response.json();
+			await apiFetch( {
+				path: `/wp/v2/posts?search=${ countries[ countryCode ] }&exclude=${ postId }&_fields=link,title,excerpt`,
+			} ).then( ( response ) => {
+				posts = response;
+			} );
 
 			setAttributes( {
 				relatedPosts:
@@ -68,7 +70,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						excerpt: relatedPost.excerpt?.rendered || '',
 					} ) ) || [],
 			} );
-		}
+		};
 
 		getRelatedPosts();
 	}, [ countryCode, setAttributes ] );

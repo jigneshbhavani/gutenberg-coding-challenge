@@ -11,6 +11,7 @@ import edit from './edit';
 import save from './save';
 
 registerBlockType( 'xwp/country-card', {
+	apiVersion: 1,
 	edit,
 	save,
 } );
